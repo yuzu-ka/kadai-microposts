@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :require_user_logged_in, only: [:index, :show]
+  before_action :require_user_logged_in, only: [:index, :show, :followings, :followers]
 
   def index
     @users = User.all.page(params[:page])
@@ -17,7 +17,6 @@ class UsersController < ApplicationController
 
   def create
     @user = User.new(user_params)
-
     if @user.save
       #session[:user_id] = @user.id ###直後にログインする時はここでセッションを入れる。
       flash[:success] = 'ユーザを登録しました。'
@@ -27,10 +26,27 @@ class UsersController < ApplicationController
       render :new
     end
   end
-end
+  
+  def followings
+    @user = User.find(params[:id])
+    @followings = @user.followings.page(params[:page])
+    counts(@user)
+  end
+  
+  def followers
+    @user = User.find(params[:id])
+    @followers = @user.followers.page(params[:page])
+    counts(@user)
+  end
+  
+  def favorites
+    @user = User.find(params[:id])
+    @favorites = @user.favorite_microposts.page(params[:page])
+  end
+  
+  private
 
-private
-
-def user_params
-  params.require(:user).permit(:name, :email, :password, :password_confirmation)
+  def user_params
+    params.require(:user).permit(:name, :email, :password, :password_confirmation)
+  end
 end
